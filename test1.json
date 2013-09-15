@@ -22,5 +22,5 @@
         }
     },
     "start":["person(mike)"],
-    "goal":["person(mike)", "has_cake(x)", "eaten_cake(mike)"]
+    "goal":["person(mike)", "has_cake(mike)", "eaten_cake(mike)"]
 }
