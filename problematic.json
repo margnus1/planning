@@ -1,24 +1,18 @@
 {  
-   "actions":{
-       "create(o)": {
-	   "preconditions":[],
-	   "effects":["exists(o)"] 
-       }
-       "mata(a, mat)": {
-	   "preconditions":["exists(mat)",
-			    "ledsen(a)"],
-	   "effects":["-ledsen(a)",
-		      "-exists(mat)",
-		      "glad(a)"]
-       }
-   },
+    "actions":{
+        "create(o)": {
+            "preconditions":[],
+            "effects":["exists(o)"] 
+        },
+        "mata(a, mat)": {
+            "preconditions":["exists(mat)",
+                             "ledsen(a)"],
+            "effects":["-ledsen(a)",
+                       "-exists(mat)",
+                       "glad(a)"]
+        }
+    },
 
-
-   "start":["ledsen(apa)"],
-   "goal":["glad(apa)"]
-
+    "start":["ledsen(apa)"],
+    "goal":["glad(apa)"]
 }
-
-
-
-

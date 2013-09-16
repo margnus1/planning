@@ -1,7 +1,12 @@
-$(SML_LIB)/basis/default.mlb
-$(SML_LIB)/smlnj-lib/Util/smlnj-lib.mlb
-(* $(SML_LIB)/mllpt-lib/mllpt-lib.mlb *)
-$(SML_LIB)/smlnj-lib/JSON/json-lib.mlb
-
+ann "nonexhaustiveMatch ignore" in 
+    $(SML_LIB)/basis/default.mlb
+    $(SML_LIB)/smlnj-lib/Util/smlnj-lib.mlb
+    $(SML_LIB)/smlnj-lib/JSON/json-lib.mlb
+    $(SML_LIB)/smlnj-lib/PP/pp-lib.mlb
+end
 
 pddl.sml
+(* We use nonexhaustive matches for convenience. We silence the warnings so
+   mistakes in oher files are more visible. *)
+ann "nonexhaustiveMatch ignore" in pddl_parser.sml end
+main.sml

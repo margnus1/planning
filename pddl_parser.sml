@@ -48,16 +48,16 @@ fun parseActions (nil : (string * value) list, acc : action list) = acc
 in
 fun parse (OBJECT ol) =
     let
-	fun findKey k l = #2 (valOf (List.find (fn (k', v) => k = k') l))
-	val OBJECT ao = findKey "actions" ol
-	val actions   = parseActions (ao, nil)
-	val ARRAY sa  = findKey "start" ol
-	val start     = parseState (sa, FluentSet.empty)
-	val ARRAY ga  = findKey "goal" ol
-	val goal      = map (parsePredicate []) ga
-	val objects   = [] (* TODO *)
+        fun findKey k l = #2 (valOf (List.find (fn (k', v) => k = k') l))
+        val OBJECT ao = findKey "actions" ol
+        val actions   = parseActions (ao, nil)
+        val ARRAY sa  = findKey "start" ol
+        val start     = parseState (sa, FluentSet.empty)
+        val ARRAY ga  = findKey "goal" ol
+        val goal      = map (parsePredicate []) ga
+        val objects   = [] (* TODO *)
     in
-	Problem { actions = actions, start = start, goal = goal, objects = objects }
+        Problem { actions = actions, start = start, goal = goal, objects = objects }
     end
 end
 end
