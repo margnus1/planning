@@ -1,4 +1,5 @@
 structure PDDL = struct
+
 datatype fluent = Fluent of { name : string, arguments : string list }
 structure FluentSet = ListSetFn(
     struct
@@ -10,6 +11,13 @@ structure FluentSet = ListSetFn(
           | v => v
     end)
 type state = FluentSet.set
+
+structure StringMap = BinaryMapFn(
+	  struct
+	  type ord_key = string
+	  val compare = String.compare
+	  end)
+
 datatype pred_arg = Literal of string | Variable of string
 datatype predicate = Predicate of { truth : bool,
                                     name : string,
@@ -18,73 +26,93 @@ datatype action = Action of { name : string,
                               variables : string list,
                               preconditions : predicate list,
                               effects : predicate list }
-datatype action_instance = Instance of { bindings : (string * string) list,
+datatype action_instance = Instance of { bindings : string StringMap.map,
                                          action : action }
 datatype problem = Problem of { actions : action list,
+				objects : string list,
                                 start : state,
-                                goal : state }
+				(* INVARIANT: There are no variables in goal *)
+                                goal : predicate list }
 
-end
+(* fun isGoal (Problem {goal,...}) state = FluentSet.equal (goal, state) *)
 
-structure PDDLParser = struct
-local
-    (* SML/NJ: CM.autoload ("$/json-lib.cm"); *)
-    open JSON
-    open PDDL
+fun getFluentsByName name state =
+    List.filter (fn Fluent {name=flun,...} => flun = name) (FluentSet.listItems state)
 
-fun parseFluent fluent = 
-    let fun separator #"," = true
-          | separator #"(" = true
-          | separator #")" = true
-          | separator c = Char.isSpace c
-        val name::args = String.tokens separator fluent
-    in (name, args) end
+(* Type: problem -> state -> action_instance list *)
+fun possibleActions (Problem {actions, objects,...}) state =
+    let
+	fun allInstances (action as Action {preconditions,...}) = 
+	    let
+		(* All bindings creating an instance of action that can be applied to state *)
+		fun instances [] bindings = 
+		    [ bindings ]
+		  | instances ((Predicate {truth, name, arguments}) ::preds) bindings =
+		    let
+			val fluentArgs = map (fn Fluent {arguments,...} => arguments) 
+					     (getFluentsByName name state)
+			fun takeEqual v (l::ls) =
+			    if v = l then SOME ls
+			    else          NONE
+			(* All bindings that make Predicate match at least one of fluentArgs. *)
+			(* fluentArgs are the arguments of the fluents of the same name *)
+			fun trueBinds _        []        _  = []
+			  | trueBinds bindings fluentArgs [] = [ bindings ]
+			  | trueBinds bindings fluentArgs (Literal  v :: args) =
+			    trueBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
+			  | trueBinds bindings fluentArgs (Variable n :: args) =
+			    case StringMap.find (bindings, n) of
+				SOME v => trueBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
+			      | NONE => 
+				let 
+				    val uniqueValues = ListMergeSort.uniqueSort String.compare 
+										(map hd fluentArgs)
+				in
+				    List.concat (
+				    map (fn v => trueBinds (StringMap.insert (bindings, n, v))
+							   (List.mapPartial (takeEqual v) fluentArgs)
+							   args)
+					uniqueValues)
+				end
 
-fun parseState (nil : value list, acc : FluentSet.set) = acc
-  | parseState ((STRING fluent)::ls, acc) =
-    let val (name, args) = parseFluent fluent 
-        val newfluent = Fluent {name = name, arguments = args} 
-    in parseState (ls, FluentSet.add (acc, newfluent)) end
+			(* Note: This is a source of combinatorial explosion. If
+                                 we allow a variable to be unbound when it may
+                                 be arbitrary, we can avoid this. *)
+			fun arbitraryBinds bindings [] = [bindings]
+			  | arbitraryBinds bindings (Literal _  :: args) = arbitraryBinds bindings args
+			  | arbitraryBinds bindings (Variable n :: args) =
+			    case StringMap.find (bindings, n) of
+				SOME _ => arbitraryBinds bindings args
+			      | NONE   => List.concat (
+					  map (fn v => arbitraryBinds (StringMap.insert (bindings, n, v)) args)
+					      objects)
 
-fun parseActions (nil : (string * value) list, acc : action list) = acc
-  | parseActions ((key, OBJECT ao)::ls, acc) =
-    let val (name, variables) = parseFluent key
-        val preconditions = ref nil : predicate list ref
-        val effects = ref nil : predicate list ref
-        fun parsePredicate (STRING pred) = 
-            let val (truth, (pname, pargs)) =
-                    if (String.sub (pred, 0) = #"-")
-                    then (false, parseFluent (String.extract (pred, 1, NONE)))
-                    else (true, parseFluent pred)
-                fun parsePredArg arg = if List.exists (fn e => e = arg) variables
-                                       then Variable arg else Literal arg
-            in Predicate { truth = truth, name = pname, 
-                           arguments = map parsePredArg pargs } end
-        fun parseAction nil = ()
-          | parseAction ((what, ARRAY pl)::ls) = 
-            ((case what of "preconditions" => preconditions | "effects" => effects)
-             := map parsePredicate pl; parseAction ls)
-        val () = parseAction ao
-        val action = Action {name = name, variables = variables,
-                             preconditions = !preconditions,
-                             effects = !effects }
+			(* All bindings that make Predicate match none of fluentArgs. *)
+			fun falseBinds bindings [] args = arbitraryBinds bindings args
+			  | falseBinds bindings _  []   = []
+			  | falseBinds bindings fluentArgs (Literal v :: args) =
+			    falseBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
+			  | falseBinds bindings fluentArgs (Variable n :: args) = 
+			    case StringMap.find (bindings, n) of
+				SOME v => falseBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
+			      | NONE => List.concat (
+					map (fn v => falseBinds bindings
+								(List.mapPartial (takeEqual v) fluentArgs) 
+								args)
+					    objects)
+		    in
+			(if truth then trueBinds else falseBinds) bindings fluentArgs arguments
+		    end
+		    
+		val (truePres, falsePres) = List.partition (fn Predicate {truth,...} => truth) preconditions
+		val allTrueBindings = instances truePres StringMap.empty 
+		val allBindings = List.concat (List.map (instances falsePres) allTrueBindings)
+	    in
+		map (fn binding => Instance { bindings = binding, action = action }) allBindings
+	    end
+	
     in
-        parseActions (ls, action :: acc)
+	List.concat (map allInstances actions)
     end
 
-fun parse' (nil, problem) = problem
-  | parse' ((("actions", OBJECT ao))::ls, (Problem {start, goal, ...})) =
-    parse' (ls, Problem {start = start, goal = goal,
-                         actions = parseActions (ao, nil)})
-  | parse' (("start", ARRAY sa)::ls, Problem {actions, start, goal}) =
-    parse' (ls, Problem {actions = actions, goal = goal,
-                         start = parseState (sa, start)})
-  | parse' (("goal",  ARRAY ga)::ls, Problem {actions, start, goal}) =
-    parse' (ls, Problem {actions = actions, start = start,
-                         goal = parseState (ga, goal)})
-in
-fun parse (OBJECT ol) = parse' (ol, Problem {actions = nil,
-                                             start = FluentSet.empty,
-                                             goal  = FluentSet.empty })
-end
 end
