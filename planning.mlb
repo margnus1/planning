@@ -7,6 +7,8 @@ end
 
 utilities.sml
 pddl.sml
+queue.sml
+pddl_bfs.sml
 (* We use nonexhaustive matches for convenience. We silence the warnings so
    mistakes in oher files are more visible. *)
 ann "nonexhaustiveMatch ignore" in pddl_parser.sml end
