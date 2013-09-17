@@ -33,6 +33,8 @@ datatype problem =           Problem of { actions      : action list,
                                           (* INVARIANT: There are no variables in goal *)
                                           goal         : predicate list }
 
+
+
 (* Type: binding -> predicate list -> FluentSet.set *)
 (* Pre: All variables in preds are bound in binding *)
 (* Note: The truth values of the predicates are discarded. *)
@@ -51,9 +53,23 @@ fun bind binding preds =
     in
         FluentSet.addList (FluentSet.empty, map bindPred preds)
     end
+
+
+fun applyAction state (Instance {bindings, action = Action{effects,...}}) =
+    let
+	fun truth (Predicate {truth, ...}) = truth
+	val (truePreds, falsePreds) = List.partition truth effects
+	val add    = bind bindings truePreds
+	val remove = bind bindings falsePreds
+	val state = FluentSet.difference(state,remove)
+        
+    in
+	FluentSet.union(state,add)
+    end
+
                 
 (* Type: predicate list -> binding -> state -> bool *)
-fun matchesPredicates preds binding state =    
+fun matchesPredicates preds binding state =
     let
         fun truth (Predicate {truth,...}) = truth
         val (truePreds, falsePreds) = List.partition truth preds
@@ -68,7 +84,7 @@ fun isGoal (Problem {goal, ...}) state = matchesPredicates goal StringMap.empty 
 
 fun getFluentsByName name state =
     List.filter (fn Fluent {name=flun,...} => flun = name) (FluentSet.listItems state)
-                
+               
 (* Type: problem -> state -> action_instance list *)
 fun possibleActions (Problem {actions, objects,...}) state =
     let
