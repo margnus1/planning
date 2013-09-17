@@ -75,9 +75,8 @@ fun possibleActions (Problem {actions, objects,...}) state =
         fun allInstances (action as Action {preconditions,...}) = 
             let
                 (* All bindings creating an instance of action that can be applied to state *)
-                fun instances [] bindings = 
-                    [ bindings ]
-                  | instances ((Predicate {truth, name, arguments}) ::preds) bindings =
+                fun instances ([] : predicate list) (bindings : binding) = [ bindings ] : binding list
+                  | instances ((Predicate {truth, name, arguments}) :: preds) bindings =
                     let
                         val fluentArgs = map (fn Fluent {arguments,...} => arguments) 
                                              (getFluentsByName name state)
@@ -89,7 +88,7 @@ fun possibleActions (Problem {actions, objects,...}) state =
                                         "Possibly mismatched number of arguments.")
                         (* All bindings that make Predicate match at least one of fluentArgs. *)
                         (* fluentArgs are the arguments of the fluents of the same name *)
-                        fun trueBinds _        []        _  = []
+                        fun trueBinds _        []         _  = []
                           | trueBinds bindings fluentArgs [] = [ bindings ]
                           | trueBinds bindings fluentArgs (Literal  v :: args) =
                             trueBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
@@ -134,11 +133,14 @@ fun possibleActions (Problem {actions, objects,...}) state =
                                                                 args)
                                             objects)
                     in
-                        (if truth then trueBinds else falseBinds) bindings fluentArgs arguments
+                        (* Note: |> is the pipelining operator, defined in utilities.sml *)
+                        (if truth then trueBinds else falseBinds) bindings fluentArgs arguments |>
+                        map (instances preds) |>
+                        List.concat                                                                         
                     end
                     
                 val (truePres, falsePres) = List.partition (fn Predicate {truth,...} => truth) preconditions
-                val allTrueBindings = instances truePres StringMap.empty 
+                val allTrueBindings = instances truePres StringMap.empty
                 val allBindings = List.concat (List.map (instances falsePres) allTrueBindings)
             in
                 map (fn binding => Instance { bindings = binding, action = action }) allBindings
