@@ -45,6 +45,22 @@ fun parseActions (nil : (string * value) list, acc : action list) = acc
         parseActions (ls, action :: acc)
     end
 
+fun inferObjectsFromFluents fluents =
+    map (fn Fluent {arguments, ...} => arguments) fluents |>
+    List.concat
+
+fun inferObjectsFromPredicate (Predicate {arguments, ...}) =
+    List.mapPartial (fn Literal v => SOME v | _ => NONE) arguments
+
+fun inferObjectsFromPredicates preds =
+    map inferObjectsFromPredicate preds |> List.concat
+
+fun inferObjectsFromActions actions =
+    map (fn Action {preconditions, effects, ...} =>
+            inferObjectsFromPredicates preconditions @
+            inferObjectsFromPredicates effects) actions |>
+    List.concat
+
 in
 fun parse (OBJECT ol) =
     let
@@ -55,7 +71,10 @@ fun parse (OBJECT ol) =
         val start     = parseState (sa, FluentSet.empty)
         val ARRAY ga  = findKey "goal" ol
         val goal      = map (parsePredicate []) ga
-        val objects   = [] (* TODO *)
+        val objects   = [inferObjectsFromActions actions,
+                         inferObjectsFromFluents (FluentSet.listItems start),
+                         inferObjectsFromPredicates goal] |>
+                        List.concat |> ListMergeSort.uniqueSort String.compare
     in
         Problem { actions = actions, start = start, goal = goal, objects = objects }
     end
