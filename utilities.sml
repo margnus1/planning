@@ -68,7 +68,9 @@ fun max comp nil = raise Empty
     case comp (elem, l) of
         GREATER => max comp (elem::ls)
       | _    => max comp (l::ls)
+fun mapConcat f = concat o map f
 end
+val mapConcat = List.mapConcat
 
 structure TextIO = struct
 open TextIO

@@ -84,12 +84,22 @@ fun isGoal (Problem {goal, ...}) state = matchesPredicates goal StringMap.empty 
 
 fun getFluentsByName name state =
     List.filter (fn Fluent {name=flun,...} => flun = name) (FluentSet.listItems state)
-               
+
 (* Type: problem -> state -> action_instance list *)
 fun possibleActions (Problem {actions, objects,...}) state =
     let
-        fun allInstances (action as Action {preconditions,...}) = 
+        fun allInstances (action as Action {preconditions, variables, ...}) =
             let
+                (* Note: This is a source of combinatorial explosion. If
+                   we allow a variable to be unbound when it may
+                   be arbitrary, we can avoid this. *)
+                fun arbitraryBinds [] bindings = [bindings]
+                  | arbitraryBinds (n :: args) bindings =
+                    case StringMap.find (bindings, n) of
+                        SOME _ => arbitraryBinds args bindings
+                      | NONE   => mapConcat (fn v => arbitraryBinds args (StringMap.insert (bindings, n, v)))
+                                            objects
+
                 (* All bindings creating an instance of action that can be applied to state *)
                 fun instances ([] : predicate list) (bindings : binding) = [ bindings ] : binding list
                   | instances ((Predicate {truth, name, arguments}) :: preds) bindings =
@@ -123,31 +133,18 @@ fun possibleActions (Problem {actions, objects,...}) state =
                                         uniqueValues)
                                 end
 
-                        (* Note: This is a source of combinatorial explosion. If
-                                 we allow a variable to be unbound when it may
-                                 be arbitrary, we can avoid this. *)
-                        fun arbitraryBinds bindings [] = [bindings]
-                          | arbitraryBinds bindings (Literal _  :: args) = arbitraryBinds bindings args
-                          | arbitraryBinds bindings (Variable n :: args) =
-                            case StringMap.find (bindings, n) of
-                                SOME _ => arbitraryBinds bindings args
-                              | NONE   => List.concat (
-                                          map (fn v => arbitraryBinds (StringMap.insert (bindings, n, v)) args)
-                                              objects)
-
                         (* All bindings that make Predicate match none of fluentArgs. *)
-                        fun falseBinds bindings [] args = arbitraryBinds bindings args
+                        fun falseBinds bindings [] args = [ bindings ]
                           | falseBinds bindings _  []   = []
                           | falseBinds bindings fluentArgs (Literal v :: args) =
                             falseBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
                           | falseBinds bindings fluentArgs (Variable n :: args) = 
                             case StringMap.find (bindings, n) of
                                 SOME v => falseBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
-                              | NONE => List.concat (
-                                        map (fn v => falseBinds bindings
-                                                                (List.mapPartial (takeEqual v) fluentArgs) 
-                                                                args)
-                                            objects)
+                              | NONE => mapConcat (fn v => falseBinds bindings
+                                                                      (List.mapPartial (takeEqual v) fluentArgs) 
+                                                                      args)
+                                                  objects
                     in
                         (* Note: |> is the pipelining operator, defined in utilities.sml *)
                         (if truth then trueBinds else falseBinds) bindings fluentArgs arguments |>
@@ -157,7 +154,8 @@ fun possibleActions (Problem {actions, objects,...}) state =
                     
                 val (truePres, falsePres) = List.partition (fn Predicate {truth,...} => truth) preconditions
                 val allTrueBindings = instances truePres StringMap.empty
-                val allBindings = List.concat (List.map (instances falsePres) allTrueBindings)
+                val allBindings = mapConcat (arbitraryBinds variables)
+                                            (mapConcat (instances falsePres) allTrueBindings)
             in
                 map (fn binding => Instance { bindings = binding, action = action }) allBindings
             end
