@@ -23,6 +23,7 @@ fun frontierAdd(frontier,visited,nil) =
 fun bfsrun(problem : problem, visited : StateSet.set, frontier : (state * action_instance list) Queue.t) =
     let
        val ((node, pathToNode), rest) = Queue.pop frontier
+           handle Empty => raise Fail "Goal unreachable in BFS.search"
        val actions = possibleActions problem node
        fun origAndResult f a = (f a, a::pathToNode)
        (* [(child, pathToChild), ...] *)
