@@ -12,29 +12,32 @@ structure StateSet = BinarySetFn(
 
 fun frontierAdd(frontier,visited,nil) =
     (frontier,visited)
-| frontierAdd(frontier,visited,child::children) =
+| frontierAdd(frontier,visited,(child, pahtToChild)::children) =
     
     if StateSet.member(visited,child) then
         frontierAdd(frontier,visited,children)
     else
-        frontierAdd(Queue.push(frontier,child),StateSet.add(visited,child),children)
+        frontierAdd (Queue.push (frontier, (child, pahtToChild)),
+		     StateSet.add (visited, child), children)
 
-fun bfsrun(problem : problem, visited : StateSet.set, frontier) =
+fun bfsrun(problem : problem, visited : StateSet.set, frontier : (state * action_instance list) Queue.t) =
     let
-       val (node, rest) = Queue.pop(frontier)
+       val ((node, pathToNode), rest) = Queue.pop frontier
        val actions = possibleActions problem node
-       val children = map (applyAction node) actions
-       val (newfrontier,newvisited) = frontierAdd(rest,visited,children)
+       fun origAndResult f a = (f a, a::pathToNode)
+       (* [(child, pathToChild), ...] *)
+       val children = map (origAndResult (applyAction node)) actions
+       val (newfrontier, newvisited) = frontierAdd(rest,visited,children)
     in
         if isGoal problem node then
-            node
+            (node, pathToNode)
         else
-      bfsrun(problem,newvisited,newfrontier)
+	    bfsrun(problem,newvisited,newfrontier)
     end
     
 in
 structure BFS = struct
     fun search (problem as Problem {start,...}) =
-        bfsrun (problem, StateSet.empty, Queue.push (Queue.empty, start))
+        bfsrun (problem, StateSet.empty, Queue.push (Queue.empty, (start, [])))
 end
 end

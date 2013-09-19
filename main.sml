@@ -15,9 +15,12 @@ case CommandLine.arguments () of
                                                                   | NONE => "???")
                                                        variables)) ^ ")"
         fun fluentToString (PDDL.Fluent {name, arguments}) =
-            name ^ "(" ^ (String.concatWith ", " arguments) ^ ")\n"
-        val goal = BFS.search(problem)
+            name ^ "(" ^ (String.concatWith ", " arguments) ^ ")"
+        val (goal, pathToGoal) = BFS.search(problem)
     in
-        List.app (TextIO.print o fluentToString) (PDDL.FluentSet.listItems goal)
+	TextIO.printLine "Goal found:";
+        List.app (TextIO.printLine o fluentToString) (PDDL.FluentSet.listItems goal);
+	TextIO.printLine "   via:";
+	List.app (fn s => TextIO.printLine (instanceToString s)) (List.rev pathToGoal)
     end
 ;

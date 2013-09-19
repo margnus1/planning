@@ -69,3 +69,8 @@ fun max comp nil = raise Empty
         GREATER => max comp (elem::ls)
       | _    => max comp (l::ls)
 end
+
+structure TextIO = struct
+open TextIO
+fun printLine t = print (t ^ "\n");
+end
