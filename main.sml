@@ -7,13 +7,13 @@ fun printUsage () =
      TextIO.printLine "      Solves the problem using BFS";
      TextIO.printLine "    stategraph:";
      TextIO.printLine "      Generates the entire state graph as a graphviz graph over stdout")
-        
+
 fun indent4 s = "    " ^ s
 val parseProblem = PDDLParser.parse o JSONParser.parseFile
 
 ; (* Imperative part starts here *)
 case CommandLine.arguments () of
-    ["bfs", file] => 
+    ["bfs", file] =>
     let
         val problem as (PDDL.Problem {start, ...}) = parseProblem file
         val timer = Timer.startRealTimer ()
@@ -30,6 +30,13 @@ case CommandLine.arguments () of
         List.app (TextIO.printLine o indent4 o instanceToString) (List.rev pathToGoal)
     end
   | ["stategraph", file] => parseProblem file |>
-                                         Stategraph.toDot
+                            Stategraph.toDot
+  | ["heuristic", file] =>
+    let
+        val problem as (PDDL.Problem {start, ...}) = parseProblem file
+    in
+        TextIO.printLine ("Distance to goal: " ^
+                          Int.toString (PlanningGraph.heuristic (PlanningGraph.init problem) start))
+    end
   | _ => printUsage ()
 ;

@@ -24,30 +24,31 @@ datatype action =            Action of { name          : string,
 datatype action_instance = Instance of { bindings      : binding,
                                          action        : action }
 
-datatype problem =           Problem of { actions      : action list,
-                                          objects      : string list,
-                                          start        : state,
-                                          (* INVARIANT: There are no variables in goal *)
-                                          goal         : predicate list }
+datatype problem =          Problem of { actions      : action list,
+                                         objects      : string list,
+                                         start        : state,
+                                         (* INVARIANT: There are no variables in goal *)
+                                         goal         : predicate list }
+
+(* Name: bindPredicate binding pred *)
+(* Type: binding -> predicate -> fluent *)
+(* Pre:  All variables in pred are bound in binding *)
+(* Note: The truth values of pred is discarded. *)
+fun bindPredicate binding (Predicate {name, arguments, ...}) =
+    let
+        fun bindArg (Literal  v) = v
+          | bindArg (Variable n) =
+            case StringMap.find (binding, n) of
+                SOME v => v
+              | NONE => raise Fail ("Unbound variable " ^ name ^ "(..., " ^ n ^ ", ...) in PDDL.bindPredicate")
+    in
+        Fluent { name = name, arguments = map bindArg arguments }
+    end
 
 (* Type: binding -> predicate list -> FluentSet.set *)
 (* Pre: All variables in preds are bound in binding *)
 (* Note: The truth values of the predicates are discarded. *)
-fun bind binding preds =
-    let
-        fun bindPred (Predicate {name, arguments, ...}) =
-            let
-                fun bindArg (Literal  v) = v
-                  | bindArg (Variable n) =
-                    case StringMap.find (binding, n) of
-                        SOME v => v
-                      | NONE => raise Fail ("Unbound variable " ^ name ^ "(..., " ^ n ^ ", ...) in PDDL.bind")
-            in
-                Fluent { name = name, arguments = map bindArg arguments }
-            end
-    in
-        FluentSet.addList (FluentSet.empty, map bindPred preds)
-    end
+fun bind binding preds = FluentSet.addList (FluentSet.empty, map (bindPredicate binding) preds)
 
 (* Name: applyAction state instance *)
 (* Type: state -> action_instance -> state *)

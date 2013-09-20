@@ -1,4 +1,4 @@
-ann "nonexhaustiveMatch ignore" in 
+ann "nonexhaustiveMatch ignore" in
     $(SML_LIB)/basis/default.mlb
     $(SML_LIB)/smlnj-lib/Util/smlnj-lib.mlb
     $(SML_LIB)/smlnj-lib/JSON/json-lib.mlb
@@ -8,6 +8,8 @@ utilities.sml
 pddl.sml
 pddl_to_string.sml
 queue.sml
+heuristic.sig
+planning_graph.sml
 pddl_bfs.sml
 stategraph.sml
 (* We use nonexhaustive matches for convenience. We silence the warnings so

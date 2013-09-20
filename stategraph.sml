@@ -2,7 +2,7 @@ structure Stategraph = struct
 local
     open PDDL
     open PDDLToString
-    structure StateMap = BinaryMapFn(struct type ord_key = state val compare = FluentSet.compare end)                
+    structure StateMap = BinaryMapFn(struct type ord_key = state val compare = FluentSet.compare end)
 in
 fun toDot (prob as Problem {start, goal,...}) =
     let
@@ -12,7 +12,7 @@ fun toDot (prob as Problem {start, goal,...}) =
         fun getNewName () = ("state" ^ Int.toString (++stateNumber))
         fun getName state = valOf (StateMap.find (!stateNames, state))
         fun outputState state =
-            let 
+            let
                 val name = getName state
                 val label = FluentSet.listItems state |>
                             map fluentToString |>
@@ -41,7 +41,7 @@ fun toDot (prob as Problem {start, goal,...}) =
                                   instanceToString action ^ "\"];")
             end
         fun iterate nil = ()
-          | iterate (state::stack) = 
+          | iterate (state::stack) =
             let
                 val actions = possibleActions prob state
                 fun origAndResult f a = (a, f a)
