@@ -1,0 +1,58 @@
+{  
+   "actions":{
+        "load(c,p,a)":{ 
+                   "preconditions":[
+                        "at(c,a)",
+                        "at(p,a)",
+                        "cargo(c)",
+                        "plane(p)",
+                        "airport(a)"],
+                   "effects":[
+                         "-at(c,a)",
+                         "at(c,p)"]
+        },
+        "unload(c,p,a)":{ 
+                   "preconditions":[
+                        "at(c,p)",
+                        "at(p,a)",
+                        "cargo(c)",
+                        "plane(p)",
+                        "airport(a)"],
+                   "effects":[
+                         "at(c,a)",
+                         "-at(c,p)"]
+        },
+        "fly(p,from,to)":{ 
+                   "preconditions":[
+                        "at(p,from)",
+                        "plane(p)",
+                        "airport(from)",
+                        "airport(to)"],
+                   "effects":[
+                         "-at(p,from)",
+                         "at(p,to)"]
+        }
+   },
+
+
+   "start":[
+        "at(c1,sfo)",
+        "at(c2,jfk)",
+        "at(p1,sfo)",
+        "at(p2,jfk)",
+        "cargo(c1)",
+        "cargo(c2)",
+        "plane(p1)",
+        "plane(p2)",
+        "airport(sfo)",
+        "airport(jfk)"],
+
+   "goal":[
+        "at(c1,jfk)",
+        "at(c2,sfo)"]
+
+}
+
+
+
+

@@ -6,6 +6,8 @@
         },
         "mata(a, mat)": {
             "preconditions":["exists(mat)",
+                             "-apa(mat)",
+                             "apa(a)",
                              "ledsen(a)"],
             "effects":["-ledsen(a)",
                        "-exists(mat)",
@@ -13,6 +15,6 @@
         }
     },
 
-    "start":["ledsen(apa)"],
-    "goal":["glad(apa)"]
+    "start":["apa(apa)", "ledsen(apa)"],
+    "goal":["apa(apa)", "glad(apa)"]
 }
