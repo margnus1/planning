@@ -7,8 +7,8 @@ fun compareFluents (Fluent {name = na, arguments = aa},
         EQUAL => List.collate String.compare (aa, ab)
       | v => v
 
-structure FluentSet = ListSetFn  (struct type ord_key = fluent val compare = compareFluents end)                 
-structure StringMap = BinaryMapFn(struct type ord_key = string val compare = String.compare end)
+structure FluentSet = ListSetFn(struct type ord_key = fluent val compare = compareFluents end)
+structure StringMap = ListMapFn(struct type ord_key = string val compare = String.compare end)
 type state = FluentSet.set
 type binding = string StringMap.map
                                  
