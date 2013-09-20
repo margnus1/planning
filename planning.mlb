@@ -10,7 +10,7 @@ pddl_to_string.sml
 queue.sml
 heuristic.sig
 planning_graph.sml
-pddl_bfs.sml
+bfs.sml
 stategraph.sml
 (* We use nonexhaustive matches for convenience. We silence the warnings so
    mistakes in oher files are more visible. *)
