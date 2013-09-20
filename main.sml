@@ -16,9 +16,15 @@ case CommandLine.arguments () of
     ["bfs", file] => 
     let
         val problem as (PDDL.Problem {start, ...}) = parseProblem file
+        val timer = Timer.startRealTimer ()
+        val cpuTimer = Timer.startCPUTimer ()
         val (goal, pathToGoal) = BFS.search(problem)
+        val time = Timer.checkRealTimer timer
+        val gcTime = Time.toReal (Timer.checkGCTime cpuTimer) /
+                     Time.toReal (#usr (Timer.checkCPUTimer cpuTimer)) * 100.0
     in
-        TextIO.printLine "Goal found:";
+        TextIO.printLine ("Goal found in " ^ Time.toString time ^ "s (" ^
+                          LargeReal.fmt (StringCvt.FIX (SOME 1)) gcTime ^ "% GC):");
         List.app (TextIO.printLine o indent4 o fluentToString) (PDDL.FluentSet.listItems goal);
         TextIO.printLine "  via:";
         List.app (TextIO.printLine o indent4 o instanceToString) (List.rev pathToGoal)
