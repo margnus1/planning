@@ -1,0 +1,90 @@
+{ 
+    "actions": { 
+        "go_shopping(x)": {
+            "preconditions":["person(x)"],
+            "effects":["has_mix(x)"]
+        },
+        "make_cake(x)": {
+            "preconditions":["person(x)", "has_mix(x)"],
+            "effects":["has_cake(x)"]
+        },
+        "wait(x)": {
+            "preconditions":["person(x)", "-hungry(x)"],
+            "effects":["hungry(x)"]
+        },
+        "eat_cake_a(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "-hungry(x)", "eaten_cake(x)"]
+        },
+        "eat_cake_b(x)": {
+            "preconditions":["person(x)", "-hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "-person(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_2_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_3_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_4_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_5_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_6_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_7_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_8_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_9_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_10_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_11_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_12_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_13_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_14_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_15_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_16_cake(x)"]
+        },
+        "eat_cake_n(x)": {
+            "preconditions":["person(x)", "hungry(x)", "has_cake(x)"],
+            "effects":["-has_cake(x)", "eaten_17_cake(x)"]
+        }
+    },
+    "start":["person(mike)"],
+    "goal":["person(mike)", "has_cake(mike)", "eaten_cake(mike)", "eaten_2_cake(mike)", "eaten_3_cake(mike)", "eaten_4_cake(mike)", "eaten_5_cake(mike)", "eaten_6_cake(mike)", "eaten_7_cake(mike)", "eaten_8_cake(mike)", "eaten_9_cake(mike)", "eaten_10_cake(mike)", "eaten_11_cake(mike)", "eaten_12_cake(mike)", "eaten_13_cake(mike)", "eaten_14_cake(mike)", "eaten_15_cake(mike)", "eaten_16_cake(mike)", "eaten_17_cake(mike)"]
+}
