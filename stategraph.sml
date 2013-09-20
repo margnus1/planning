@@ -4,7 +4,7 @@ local
     open PDDLToString
     structure StateMap = BinaryMapFn(struct type ord_key = state val compare = FluentSet.compare end)                
 in
-fun toDot (prob as Problem {start, ...}) =
+fun toDot (prob as Problem {start, goal,...}) =
     let
         val stateNumber = ref 0
         val stateNames  = ref StateMap.empty : string StateMap.map ref
@@ -17,8 +17,12 @@ fun toDot (prob as Problem {start, ...}) =
                 val label = FluentSet.listItems state |>
                             map fluentToString |>
                             String.concatWith ",\\n"
+                val style = if FluentSet.equal (state, start) then ", style=dashed"
+                            else if isGoal prob state         then ", style=filled"
+                            else                                   ""
             in
-                TextIO.printLine (name ^ " [label=\"" ^ label ^ "\"];")
+                TextIO.printLine (name ^ " [label=\"" ^ label ^ "\"" ^
+                                  style ^ "];")
             end
         fun addState state =
             case StateMap.find (!stateNames, state) of
