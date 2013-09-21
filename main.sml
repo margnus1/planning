@@ -15,10 +15,10 @@ fun indent4 s = "    " ^ s
 
 fun checkPathA (problem, current, nil) =
     if isGoal problem current
-   then
-	   true
+    then
+        true
     else
-	false
+        false
 
 | checkPathA (problem as Problem{goal,...}, current, path : action_instance list) =
     let
@@ -37,7 +37,7 @@ fun checkPath (problem as Problem{start, ...}, path : action_instance list) =
 
 
 val parseProblem = PDDLParser.parse o JSONParser.parseFile
-structure AStar = AStarFn(PlanningGraph)
+structure AStar = AStarFn(MismatchingPredicates)
 
 ; (* Imperative part starts here *)
 case CommandLine.arguments () of
@@ -60,7 +60,7 @@ case CommandLine.arguments () of
 	    TextIO.printLine "Solution Ok!"
 	else
 	    raise Fail "The path is not a solution."
-			   
+
     end
   | ["astar", file] =>
     let

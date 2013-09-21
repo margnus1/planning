@@ -124,6 +124,9 @@ local
             fun hasEffect state (Action {effects, ...}) = StateSet.member (effects, state)
             val supports1 = List.filter (hasEffect state1) al
             val supports2 = List.filter (hasEffect state2) al
+            (* THIS IS SLOW *)
+            (* Idea: For every pair of non mutually exclusive actions,
+               generate the set of states that they lift the mutual exclusion of *)
             val supportCross =
                 foldl (fn (a1, acc) => map (fn a2 => mkARelation (a1, a2))
                                            supports2 |>

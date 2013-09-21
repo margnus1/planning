@@ -13,6 +13,7 @@ heuristic.sig
 binheap.sml
 astar.sml
 planning_graph.sml
+mismatching_predicates.sml
 bfs.sml
 stategraph.sml
 (* We use nonexhaustive matches for convenience. We silence the warnings so
