@@ -4,6 +4,7 @@ ann "nonexhaustiveMatch ignore" in
     $(SML_LIB)/smlnj-lib/JSON/json-lib.mlb
 end
 
+binheap.sml
 utilities.sml
 pddl.sml
 pddl_to_string.sml

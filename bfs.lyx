@@ -291,12 +291,13 @@ reference "alg:bfs"
 \end_inset
 
 .
- We start with finding all posible actions that can be applyed to the current
- state, then for eatch of the posible actions we run that action and if
- we reach a new state we check if its the goal state, and if its not the
- goal state we find all posible actions from this new state and again run
- them we repeat this prossec untill we reach the goal state, then we return
- the goal state and the path we took to reach that goal.
+ We start with finding all possible actions that can be applied to the current
+ state, then for each of the possible actions we run that action and if
+ we reach a new state we check if it's the goal state, and if it's not the
+ goal state we find all possible actions from this new state and again run
+ them.
+ This procedure was repeted until the goal state was reached.
+ Then we return the goal state and the path we took to reach that goal.
 \end_layout
 
 \end_body

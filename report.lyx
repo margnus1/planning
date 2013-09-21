@@ -85,11 +85,11 @@ Rickard Lööf
 \begin_inset Newline newline
 \end_inset
 
-Patrik w
+Patrik Broman
 \begin_inset Newline newline
 \end_inset
 
-Magnus lång
+Magnus Lång
 \end_layout
 
 \begin_layout Section
@@ -97,9 +97,11 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-Since the primary goal was to find the shortest path to the goal state,
- we decided to use Breath first search algorithm since it will find the
- shortest path first
+Since the primary goal is to find the shortest path to the goal state, we
+ decided to use Breadth first search algorithm since it is guaranteed to
+ find the shortest path.
+ But since BFS can choke on trees with a lot of nodes we decided to also
+ use A* to complement BFS running them both in parallel.
 \end_layout
 
 \begin_layout Section
@@ -110,6 +112,389 @@ BFS
 \begin_inset CommandInset include
 LatexCommand input
 filename "bfs.lyx"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+A*
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+derp
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A* first searches for the route that appears to be leading towards the goal,
+ but unlike a normal best-first search it also takes the distance already
+ traveled into account.
+ It maintains a priority queue of nodes that need to be visited.
+\end_layout
+
+\begin_layout Standard
+At each step in the algorithm the highest priority gets removed from the
+ queue and its neighbors values are updated, the algorithm continues until
+ a goalnode have lowest value in the queue or the queue is empty.
+\end_layout
+
+\begin_layout Standard
+As heuristic planning graph algorith was chosen.
+ 
+\begin_inset Newline newline
+\end_inset
+
+In a Planning graph the first state layer have all literals as true and
+ each action layer has all the actions that could be preformed on that first
+ state layer pointing on there preconditions, even trivial actions are there
+ so we dont loose states.
+ Eatch state layer now have all literals that are the result of the action
+ layer befor and have there states pointing to the action they are the effect
+ of.
+ we now apply mutual exclution.
+ and two actions are recorded as incompatible if, one action's effect negates
+ an effect of the other or if one action's effect is the negation of a precondit
+ion of the other or if a precondition for one action is marked as exclusive
+ to a precondition for the other.
+ We continue and add a new state level in the same way and at each stage
+ the number of actions/literals increase, we continue like this untill two
+ consecutive levels are indentical, it have now terminated.
+ so now if any goal literal fails to appear in the final state level the
+ problem is unsolvable.
+\end_layout
+
+\begin_layout Section
+BFS Example
+\end_layout
+
+\begin_layout Standard
+Let us step through an exaple run on teh following file,
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "test1.json"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We start with parsing the file so we get more usefull data.
+ In other words we save all actions in a list, all objects found in a list,
+ the starting state and the goal we try to reach.
+\begin_inset Newline newline
+\end_inset
+
+So in the example test1.json above we would have
+\begin_inset Newline newline
+\end_inset
+
+Actions:[
+\family typewriter
+go_shopping(x)
+\family default
+,
+\family typewriter
+make_cake(x)
+\family default
+,
+\family typewriter
+wait(x)
+\family default
+,
+\family typewriter
+eat_cake_a(x)
+\family default
+, 
+\family typewriter
+eat_cake_b(x)
+\family default
+]
+\begin_inset Newline newline
+\end_inset
+
+Objects:[
+\family typewriter
+mike
+\family default
+]
+\begin_inset Newline newline
+\end_inset
+
+start: 
+\family typewriter
+person(mike)
+\family default
+
+\begin_inset Newline newline
+\end_inset
+
+goal: [
+\family typewriter
+person(mike)
+\family default
+,
+\family typewriter
+has_cake(mike)
+\family default
+,
+\family typewriter
+eaten_cake(mike)
+\family default
+]
+\begin_inset Newline newline
+\end_inset
+
+Now we find all actions the can be run on the starting state.
+ In this case it is wait and go_shopping since they only need a person and
+ in waits case also that you dont have hungry.
+ So now we branch off in two different directions as you can see in the
+ picture below 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "test1"
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+To simplify this example we chose to follow the path that start with go_shopping
+ even if in reality both paths are run seperetly.
+ In this case when we apply go_shopping.
+ The new state we get is
+\begin_inset Newline newline
+\end_inset
+
+State:(
+\family typewriter
+person(mike)
+\family default
+, 
+\family typewriter
+has_mix(mike)
+\family default
+)
+\begin_inset Newline newline
+\end_inset
+
+Now with this new state we do the same thing again, that is, locating all
+ possible actions that can be applied on the current state.
+ The actions we get is wait, go_shopping and the new one make_cake.
+ This time we branch off into three ways with one action (go_shopping) leading
+ back to the same state since you can only have one instace of every fluent
+ (
+\family typewriter
+has_mix(mike)
+\family default
+).
+ Once again just for this example we follow the wait path and apply it to
+ the current state and end up in the state
+\begin_inset Newline newline
+\end_inset
+
+State:(
+\family typewriter
+person(mike)
+\family default
+,
+\family typewriter
+has_mix(mike)
+\family default
+,
+\family typewriter
+hungry(mike)
+\family default
+)
+\begin_inset Newline newline
+\end_inset
+
+As can be seen in the 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "test1"
+
+\end_inset
+
+, if we would have taken the wait path in the first step and then did go_shoppin
+g we would have ended up in this state.
+\begin_inset Newline newline
+\end_inset
+
+So now once again we check what actions is applicable on the current state
+ and they are go_shopping and make_cake.
+ We lose wait since it have a precondition that you cant have hungry.
+ So now we only have one nonlooping choice and that is to make_cake and
+ we then end up in the new state
+\begin_inset Newline newline
+\end_inset
+
+State:(
+\family typewriter
+person(mike)
+\family default
+,
+\family typewriter
+has_mix(mike)
+\family default
+,
+\family typewriter
+hungry(mike)
+\family default
+,
+\family typewriter
+has_cake(mike)
+\family default
+)
+\begin_inset Newline newline
+\end_inset
+
+We again find the action we can apply.
+ They are go_shopping, make_cake and eat_cake_a.
+ We follow eat_cake_a since it's the only one that doesn't loop to the same
+ state again, so after applying eat_cake we end up in the new state
+\begin_inset Newline newline
+\end_inset
+
+State:(
+\family typewriter
+person(mike)
+\family default
+,
+\family typewriter
+has_mix(mike)
+\family default
+,
+\family typewriter
+eaten_cake(mike)
+\family default
+)
+\begin_inset Newline newline
+\end_inset
+
+We again find the actions we can apply.
+ They are go_shopping, make_cake and wait.
+ We follow make_cake and end up in the state
+\begin_inset Newline newline
+\end_inset
+
+State:(
+\family typewriter
+person(mike)
+\family default
+,
+\family typewriter
+has_mix(mike)
+\family default
+,
+\family typewriter
+eaten_cake(mike)
+\family default
+,
+\family typewriter
+has_cake(mike)
+\family default
+)
+\begin_inset Newline newline
+\end_inset
+
+Now we can see that we have reached a state that contains the goal state
+\begin_inset Newline newline
+\end_inset
+
+goal: [
+\family typewriter
+person(mike)
+\family default
+,
+\family typewriter
+has_cake(mike)
+\family default
+,
+\family typewriter
+eaten_cake(mike)
+\family default
+]
+\begin_inset Newline newline
+\end_inset
+
+State:(
+\family typewriter
+person(mike)
+\family default
+,
+\family typewriter
+has_cake(mike)
+\family default
+,
+\family typewriter
+eaten_cake(mike)
+\family default
+,
+\family typewriter
+has_mix(mike)
+\family default
+)
+\begin_inset Newline newline
+\end_inset
+
+and because a BFS runs all steps in parallel the first path to the goal
+ we find is one of the shortest ones.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename graph.eps
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Picture
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "test1"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
 
 \end_inset
 

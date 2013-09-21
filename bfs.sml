@@ -31,7 +31,7 @@ fun bfsrun(problem : problem, visited : StateSet.set, frontier : (state * action
        val (newfrontier, newvisited) = frontierAdd(rest,visited,children)
     in
         if isGoal problem node then
-            (node, pathToNode)
+            (node, List.rev pathToNode)
         else
 	    bfsrun(problem,newvisited,newfrontier)
     end

@@ -1,0 +1,169 @@
+{ 
+    "actions": { 
+        "pickuprock(x)": {
+            "preconditions":["person(x)"],
+            "effects":["has_rock(x)"]
+        },
+        "throw(x)": {
+            "preconditions":["person(x)",
+                             "has_rock(x)",
+                             "person(patrik)"],
+            "effects":["-has_rock(x)",
+                       "-person(patrik)",
+                       "blood(patrik)"]
+        },
+        "throw2(x)": {
+            "preconditions":["person(patrik)",
+                             "person(x)",
+                             "has_rock(patrik)",
+                             "angry(patrik)"],
+            "effects":["-has_rock(patrik)",
+                       "-person(magnus)",
+                       "blood(magnus)"]
+        },
+        "miss(x)": {
+            "preconditions":["person(x)",
+                             "has_rock(x)"],
+            "effects":["-has_rock(x)",
+                       "sad(x)"]
+        },
+        "crush(x)": {
+            "preconditions":["person(x)", "has_rock(x)"],
+            "effects":["crushed_materia(x)","-has_rock(x)"]
+        },
+	"revive(x)": {
+            "preconditions":["-person(x)",
+                             "crushed_materia(x)"],
+            "effects":["-crushed_materia(x)","person(x)","angry(x)"]
+        },
+	"make_food(x)": {
+            "preconditions":["person(x)",
+                             "crushed_materia(x)"],
+            "effects":["-crushed_materia(x)","got_food(x)"]
+        },
+	"eat(x)": {
+            "preconditions":["person(x)",
+                             "got_food(x)"],
+            "effects":["-got_food(x)","-angry(x)"]
+        },
+	"collect_blood1(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)"],
+            "effects":["-blood(patrik)","1bags(x)"]
+        },
+
+	"collect_blood2(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "1bags(x)"],
+            "effects":["-blood(patrik)","-1bags(x)","2bags(x)"]
+        },
+	"collect_blood3(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "2bags(x)"],
+            "effects":["-blood(patrik)","-2bags(x)","3bags(x)"]
+        },
+	"collect_blood4(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "3bags(x)"],
+            "effects":["-blood(patrik)","-3bags(x)","4bags(x)"]
+        },
+	"collect_blood5(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "4bags(x)"],
+            "effects":["-blood(patrik)","-4bags(x)","5bags(x)"]
+        },
+	"collect_blood6(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "5bags(x)"],
+            "effects":["-blood(patrik)","-5bags(x)","6bags(x)"]
+        },
+	"collect_blood7(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "6bags(x)"],
+            "effects":["-blood(patrik)","-6bags(x)","7bags(x)"]
+        },
+	"collect_blood8(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "7bags(x)"],
+            "effects":["-blood(patrik)","-7bags(x)","8bags(x)"]
+        },
+	"collect_blood9(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "8bags(x)"],
+            "effects":["-blood(patrik)","-8bags(x)","9bags(x)"]
+        },
+	"collect_blood10(x)": {
+            "preconditions":["person(x)",
+                             "blood(patrik)",
+                             "9bags(x)"],
+            "effects":["-blood(patrik)","-9bags(x)","10bags(x)"]
+        },
+	"trash_blood1(x)": {
+            "preconditions":["person(x)",
+                             "1bags(x)"],
+            "effects":["-1bags(x)"]
+        },
+	"trash_blood2(x)": {
+            "preconditions":["person(x)",
+                             "2bags(x)"],
+            "effects":["-2bags(x)","1bags(x)"]
+        },
+	"trash_blood3(x)": {
+            "preconditions":["person(x)",
+                             "3bags(x)"],
+            "effects":["-3bags(x)","2bags(x)"]
+        },
+	"trash_blood4(x)": {
+            "preconditions":["person(x)",
+                             "4bags(x)"],
+            "effects":["-4bags(x)","3bags(x)"]
+        },
+	"trash_blood5(x)": {
+            "preconditions":["person(x)",
+                             "5bags(x)"],
+            "effects":["-5bags(x)","4bags(x)"]
+        },
+	"trash_blood6(x)": {
+            "preconditions":["person(x)",
+                             "6bags(x)"],
+            "effects":["-6bags(x)","5bags(x)"]
+        },
+	"trash_blood7(x)": {
+            "preconditions":["person(x)",
+                             "7bags(x)"],
+            "effects":["-7bags(x)","6bags(x)"]
+        },
+	"trash_blood8(x)": {
+            "preconditions":["person(x)",
+                             "8bags(x)"],
+            "effects":["-8bags(x)","7bags(x)"]
+        },
+	"trash_blood9(x)": {
+            "preconditions":["person(x)",
+                             "9bags(x)"],
+            "effects":["-9bags(x)","8bags(x)"]
+        },
+	"trash_blood10(x)": {
+            "preconditions":["person(x)",
+                             "10bags(x)"],
+            "effects":["-10bags(x)","9bags(x)"]
+        },
+	"call_police(x)": {
+            "preconditions":["person(x)",
+                             "3bags(x)"],
+            "effects":["on_the_way(police)"]
+        }
+    },
+    "start":["person(magnus)","person(patrik)","person(rickard)"],
+    "goal":["person(magnus)","blood(magnus)","-angry(magnus)",
+            "person(patrik)","1bags(magnus)","angry(patrik)",
+            "on_the_way(police)"]
+}
