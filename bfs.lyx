@@ -256,7 +256,7 @@ KwRet{the goal state and the Path to that goal}
 
  
 \backslash
-caption{How to write algorithms}
+caption{BFS}
 \end_layout
 
 \begin_layout Plain Layout
