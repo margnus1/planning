@@ -13,17 +13,17 @@ local
     structure StateSet = BinarySetFn(struct type ord_key = fluent_state val compare = compareStates end)
     (* Invariant: compareStates (a, b) = GREATER forall (a, b) : state_relation *)
     type state_relation = fluent_state * fluent_state
-    fun mkRelation (stateA, stateB) =
+    fun mkSRelation (stateA, stateB) =
         case compareStates (stateA, stateB) of
             GREATER => (stateA, stateB)
           | LESS    => (stateB, stateA)
-          | _ => raise Fail "PlanningGraph.mkRelation: a state cannot be mutually exclusive with itself"
+          | _ => raise Fail "PlanningGraph.mkSRelation: a state cannot be mutually exclusive with itself"
     fun compareRelation ((a1, a2), (b1, b2)) =
         case compareStates (a1, b1) of
             EQUAL => compareStates (a2, b2)
           | ord => ord
-    structure RelationSet = BinarySetFn(struct type ord_key = state_relation val compare = compareRelation end)
-    type state_layer = { states : StateSet.set, mutexes : RelationSet.set }
+    structure SRelationSet = BinarySetFn(struct type ord_key = state_relation val compare = compareRelation end)
+    type state_layer = { states : StateSet.set, mutexes : SRelationSet.set }
     fun predicateToState binding (pred as Predicate {truth=true,  ...}) = True  (bindPredicate binding pred)
       | predicateToState binding (pred as Predicate {truth=false, ...}) = False (bindPredicate binding pred)
     datatype action = Id of fluent_state | Action of { name          : string,
@@ -42,6 +42,15 @@ local
         case String.compare (name1, name2) of
             EQUAL => List.collate (List.collate compareStates) ([preds1, effects1], [preds2, effects2])
           | ord => ord
+    (* Invariant: compareActions (a, b) = GREATER forall (a, b) : action_relation *)
+    type action_relation = action * action
+    fun mkARelation (actionA, actionB) =
+        case compareActions (actionA, actionB) of
+            GREATER => (actionA, actionB)
+          | LESS    => (actionB, actionA)
+          | _ => raise Fail "PlanningGraph.mkARelation: an action cannot be mutually exclusive with itself"
+
+    type action_layer = { actions : action list, mutexes : action_relation list }
 
     fun plan ({states, mutexes} : state_layer) =
         let
