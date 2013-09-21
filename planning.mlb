@@ -9,6 +9,8 @@ pddl.sml
 pddl_to_string.sml
 queue.sml
 heuristic.sig
+binheap.sml
+astar.sml
 planning_graph.sml
 bfs.sml
 stategraph.sml
