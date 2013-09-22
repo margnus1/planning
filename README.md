@@ -3,12 +3,12 @@ planning
 
 A simple planning problem solver
 
-It uses a retarded, arbitrary, and ambigous encoding of the PDDL language in JSON,
+It uses an arbitrary and ambigous encoding of the PDDL language in JSON,
 however, it should be straight-forward to add a parser for proper PDDL to it.
 
 compiling
 ---------
-It is compiled using the [MLton](mlton.org) whole-program optimising Standard-ML compiler
+It is compiled using the [MLton](http://mlton.org) whole-program optimising Standard-ML compiler
 
     mlton planning.mlb
 
