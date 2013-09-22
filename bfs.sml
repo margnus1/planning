@@ -16,7 +16,7 @@ fun frontierAdd(frontier,visited,nil) =
         frontierAdd(frontier,visited,children)
     else
         frontierAdd (Queue.push (frontier, (child, pahtToChild)),
-		     StateSet.add (visited, child), children)
+                     StateSet.add (visited, child), children)
 
 fun bfsrun(problem : problem, visited : StateSet.set, frontier : (state * action_instance list) Queue.t) =
     let
@@ -31,7 +31,7 @@ fun bfsrun(problem : problem, visited : StateSet.set, frontier : (state * action
         if isGoal problem node then
             (node, List.rev pathToNode)
         else
-	    bfsrun(problem,newvisited,newfrontier)
+            bfsrun(problem,newvisited,newfrontier)
     end
 
 in

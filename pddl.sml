@@ -13,22 +13,23 @@ type state = FluentSet.set
 type binding = string StringMap.map
 
 datatype pred_arg = Literal of string | Variable of string
-datatype predicate =      Predicate of { truth         : bool,
-                                         name          : string,
-                                         arguments     : pred_arg list }
+datatype predicate =      Predicate of { truth          : bool,
+                                         name           : string,
+                                         arguments      : pred_arg list }
 
-datatype action =            Action of { name          : string,
-                                         variables     : string list,
-                                         preconditions : predicate list,
-                                         effects       : predicate list }
-datatype action_instance = Instance of { bindings      : binding,
-                                         action        : action }
+datatype action =            Action of { name           : string,
+                                         variables      : string list,
+                                         used_variables : string list,
+                                         preconditions  : predicate list,
+                                         effects        : predicate list }
+datatype action_instance = Instance of { bindings       : binding,
+                                         action         : action }
 
-datatype problem =          Problem of { actions      : action list,
-                                         objects      : string list,
-                                         start        : state,
+datatype problem =          Problem of { actions        : action list,
+                                         objects        : string list,
+                                         start          : state,
                                          (* INVARIANT: There are no variables in goal *)
-                                         goal         : predicate list }
+                                         goal           : predicate list }
 
 (* Name: bindPredicate binding pred *)
 (* Type: binding -> predicate -> fluent *)
@@ -144,7 +145,7 @@ fun satisfyingBindings _ _ ([] : predicate list) (bindings : binding) = [ bindin
 (* Type: problem -> state -> action_instance list *)
 fun possibleActions (problem as Problem {actions, objects,...}) state =
     let
-        fun allInstances (action as Action {preconditions, variables, ...}) =
+        fun allInstances (action as Action {preconditions, used_variables, ...}) =
             let
                 (* Note: This is a source of combinatorial explosion. If
                    we allow a variable to be unbound when it may
@@ -158,7 +159,7 @@ fun possibleActions (problem as Problem {actions, objects,...}) state =
 
                 val (truePres, falsePres) = List.partition (fn Predicate {truth,...} => truth) preconditions
                 val allTrueBindings = satisfyingBindings problem state truePres StringMap.empty
-                val allBindings = mapConcat (arbitraryBinds variables)
+                val allBindings = mapConcat (arbitraryBinds used_variables)
                                             (mapConcat (satisfyingBindings problem state falsePres)
                                                        allTrueBindings)
             in

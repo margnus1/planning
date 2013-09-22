@@ -75,4 +75,6 @@ val mapConcat = List.mapConcat
 structure TextIO = struct
 open TextIO
 fun printLine t = print (t ^ "\n");
+fun printError t = (output (stdErr, t); flushOut stdErr)
+fun errorLine t = printError (t ^ "\n")
 end

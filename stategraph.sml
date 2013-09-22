@@ -38,7 +38,7 @@ fun toDot (prob as Problem {start, goal,...}) =
                 val toName = getName to
             in
                 TextIO.printLine (fromName ^ " -> " ^ toName ^ " [label=\"" ^
-                                  instanceToString action ^ "\"];")
+                                  instanceToString prob action ^ "\"];")
             end
         fun iterate nil = ()
           | iterate (state::stack) =

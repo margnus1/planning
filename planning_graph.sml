@@ -62,9 +62,10 @@ local
     type action_layer = { actions : ActionSet.set, mutexes : ARelationSet.set }
 in
 
-datatype internal_state = IS of { goal        : StateSet.set,
-                                  all_fluents : fluent list,
-                                  all_actions : action list }
+datatype internal_state = IS of { goal         : StateSet.set,
+                                  goal_mutexes : SRelationSet.set,
+                                  all_fluents  : fluent list,
+                                  all_actions  : action list }
 
 local
     fun canPerform states (Action {preconditions, ...}) =
@@ -142,26 +143,26 @@ local
         map (fn Action {effects, ...} => effects) (ActionSet.listItems actions) |>
         foldl StateSet.union StateSet.empty
 
-    fun plan (is as IS {goal, ...}) (sl as {states, mutexes} : state_layer) =
-        let
-            val al as {actions, mutexes=amutexes} = planActions is sl
-            val newStates  = extrapolateStates actions
-            fun mkMutexes [] acc = acc
-              | mkMutexes (s1::Ss) acc =
-                List.mapPartial (fn s2 => if sCompetes al (s1, s2)
-                                          then SOME (mkSRelation (s1, s2))
-                                          else NONE)
-                                Ss |>
-                curry SRelationSet.addList acc |>
-                mkMutexes Ss
-            val newMutexes = mkMutexes (StateSet.listItems newStates) SRelationSet.empty
-        in
-            if StateSet.equal (states, newStates) andalso
-               SRelationSet.equal (newMutexes, mutexes) then
-                0
-            else
+    fun plan (is as IS {goal, goal_mutexes, ...}) (sl as {states, mutexes} : state_layer) =
+        if StateSet.isEmpty (StateSet.difference (goal, states)) andalso
+           SRelationSet.isEmpty (SRelationSet.intersection (goal_mutexes, mutexes))
+        then 0
+        else
+            let
+                val al as {actions, mutexes=amutexes} = planActions is sl
+                val newStates  = extrapolateStates actions
+                fun mkMutexes [] acc = acc
+                  | mkMutexes (s1::Ss) acc =
+                    List.mapPartial (fn s2 => if sCompetes al (s1, s2)
+                                              then SOME (mkSRelation (s1, s2))
+                                              else NONE)
+                                    Ss |>
+                                    curry SRelationSet.addList acc |>
+                                    mkMutexes Ss
+                val newMutexes = mkMutexes (StateSet.listItems newStates) SRelationSet.empty
+            in
                 1 + plan is { states = newStates, mutexes = newMutexes }
-        end
+            end
 
     fun gatherFluents' [] binding = binding
       | gatherFluents' (Predicate {name, arguments, ...} :: preds) binding =
@@ -188,16 +189,16 @@ local
 
     fun generateActions objects nil acc = acc
       | generateActions objects
-                        (PDDL.Action{name, variables, preconditions, effects}::acts) acc =
+                        (PDDL.Action{name, used_variables, preconditions, effects, ...}::acts) acc =
         map (fn binds =>
                 let
                     val binding = foldl StringMap.insert' StringMap.empty
-                                        (ListPair.zipEq (variables, binds))
+                                        (ListPair.zipEq (used_variables, binds))
                 in
                     Action { preconditions = map (predicateToState binding) preconditions |> SSfromList,
                              effects       = map (predicateToState binding) effects       |> SSfromList}
                 end)
-            (arbitraryArgs objects (length variables))
+            (arbitraryArgs objects (length used_variables))
         @ acc |> generateActions objects acts
 
 in
@@ -209,13 +210,20 @@ fun init (Problem {goal, actions, objects, ...}) =
         val allFluents = generateFluents objects allFluentNames
         val allActions = mapConcat Ids allFluents |>
                          generateActions objects actions
+        val goalList = map (predicateToState StringMap.empty) goal
+        fun mkMutexes []      acc = acc
+          | mkMutexes (g::gs) acc =
+            foldl (fn (h, rs) => SRelationSet.add (rs, mkSRelation (g, h)))
+                  acc gs |>
+            mkMutexes gs
     in
-        IS { goal = map (predicateToState StringMap.empty) goal |> SSfromList,
+        IS { goal = SSfromList goalList,
+             goal_mutexes = mkMutexes goalList SRelationSet.empty,
              all_fluents = allFluents,
              all_actions = ListMergeSort.uniqueSort compareActions allActions }
     end
 
-fun heuristic (is as IS {goal, all_fluents, all_actions})
+fun heuristic (is as IS {goal, all_fluents, all_actions, ...})
               (state : PDDL.state) =
     let
         fun generateFluent fluent =

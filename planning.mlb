@@ -8,6 +8,7 @@ binheap.sml
 utilities.sml
 pddl.sml
 pddl_to_string.sml
+pddl_to_json.sml
 queue.sml
 heuristic.sig
 binheap.sml
