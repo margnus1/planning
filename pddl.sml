@@ -85,7 +85,20 @@ fun isGoal (Problem {goal, ...}) state = matchesPredicates goal StringMap.empty 
 
 (* Type: string -> FluentSet.set -> fluent list *)
 fun getFluentsByName name state =
-    List.filter (fn Fluent {name=flun,...} => flun = name) (FluentSet.listItems state)
+    FluentSet.listItems (FluentSet.filter (fn Fluent {name=flun,...} => flun = name) state)
+
+fun getFluentsMatchingPattern (n, pattern) state =
+    let
+        fun matchPattern (nil, nil) = true
+          | matchPattern (NONE::ps, _::ss) = matchPattern (ps, ss)
+          | matchPattern ((SOME pv)::ps, sv::ss) =
+            pv = sv andalso matchPattern (ps, ss)
+          | matchPattern _ = raise Fail "Argument count mismatch in PDDL.getFluentsMatchingPattern"
+    in
+        (FluentSet.filter (fn Fluent {name, arguments} => name = n andalso matchPattern (pattern, arguments))
+                          state) |>
+        FluentSet.listItems
+    end
 
 (* Name: satisfyingBindings problem state predicates binding *)
 (* Type: problem -> state -> predicate list -> binding -> binding list *)
@@ -95,8 +108,10 @@ fun satisfyingBindings _ _ ([] : predicate list) (bindings : binding) = [ bindin
   | satisfyingBindings (problem as Problem {objects, ...}) (state : state)
                        ((Predicate {truth, name, arguments}) :: preds) bindings =
     let
+        val pattern = map (fn Literal l  => SOME l
+                            | Variable v => StringMap.find (bindings, v)) arguments
         val fluentArgs = map (fn Fluent {arguments,...} => arguments)
-                             (getFluentsByName name state)
+                             (getFluentsMatchingPattern (name, pattern) state)
         fun takeEqual v (l::ls) =
             if v = l then SOME ls
             else          NONE
@@ -109,7 +124,8 @@ fun satisfyingBindings _ _ ([] : predicate list) (bindings : binding) = [ bindin
         fun trueBinds _        []         _  = []
           | trueBinds bindings fluentArgs [] = [ bindings ]
           | trueBinds bindings fluentArgs (Literal  v :: args) =
-            trueBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
+            (* We have already prefiltered non-matching literals above *)
+            trueBinds bindings fluentArgs args
           | trueBinds bindings fluentArgs (Variable n :: args) =
             case StringMap.find (bindings, n) of
                 SOME v => trueBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
