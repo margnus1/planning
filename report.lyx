@@ -77,7 +77,7 @@ Report, Group 4
 \begin_inset Newline newline
 \end_inset
 
-Assingment 1 AI PDDL
+Assignment 1 AI PDDL
 \end_layout
 
 \begin_layout Author
@@ -123,20 +123,6 @@ A*
 \end_layout
 
 \begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-derp
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 A* first searches for the route that appears to be leading towards the goal,
  but unlike a normal best-first search it also takes the distance already
  traveled into account.
@@ -146,11 +132,11 @@ A* first searches for the route that appears to be leading towards the goal,
 \begin_layout Standard
 At each step in the algorithm the highest priority gets removed from the
  queue and its neighbors values are updated, the algorithm continues until
- a goalnode have lowest value in the queue or the queue is empty.
+ a goal node have lowest value in the queue or the queue is empty.
 \end_layout
 
 \begin_layout Standard
-As heuristic planning graph algorith was chosen.
+As heuristic planning graph algorithm was chosen.
  
 \begin_inset Newline newline
 \end_inset
@@ -158,18 +144,18 @@ As heuristic planning graph algorith was chosen.
 In a Planning graph the first state layer have all literals as true and
  each action layer has all the actions that could be preformed on that first
  state layer pointing on there preconditions, even trivial actions are there
- so we dont loose states.
- Eatch state layer now have all literals that are the result of the action
- layer befor and have there states pointing to the action they are the effect
- of.
- we now apply mutual exclution.
+ so we don’t loose states.
+ Each state layer now have all literals that are the result of the action
+ layer before and have there states pointing to the action they are the
+ effect of.
+ we now apply mutual exclusion.
  and two actions are recorded as incompatible if, one action's effect negates
  an effect of the other or if one action's effect is the negation of a precondit
 ion of the other or if a precondition for one action is marked as exclusive
  to a precondition for the other.
  We continue and add a new state level in the same way and at each stage
- the number of actions/literals increase, we continue like this untill two
- consecutive levels are indentical, it have now terminated.
+ the number of actions/literals increase, we continue like this until two
+ consecutive levels are identical, it have now terminated.
  so now if any goal literal fails to appear in the final state level the
  problem is unsolvable.
 \end_layout
@@ -179,7 +165,7 @@ BFS Example
 \end_layout
 
 \begin_layout Standard
-Let us step through an exaple run on teh following file,
+Let us step through an example run on the following file,
 \end_layout
 
 \begin_layout Standard
@@ -193,7 +179,7 @@ filename "test1.json"
 \end_layout
 
 \begin_layout Standard
-We start with parsing the file so we get more usefull data.
+We start with parsing the file so we get more useful data.
  In other words we save all actions in a list, all objects found in a list,
  the starting state and the goal we try to reach.
 \begin_inset Newline newline
@@ -261,7 +247,11 @@ eaten_cake(mike)
 
 Now we find all actions the can be run on the starting state.
  In this case it is wait and go_shopping since they only need a person and
- in waits case also that you dont have hungry.
+ in waits case also that you 
+\lang british
+don’t
+\lang english
+ have hungry.
  So now we branch off in two different directions as you can see in the
  picture below 
 \begin_inset CommandInset ref
@@ -275,7 +265,7 @@ reference "test1"
 \end_inset
 
 To simplify this example we chose to follow the path that start with go_shopping
- even if in reality both paths are run seperetly.
+ even if in reality both paths are run separately.
  In this case when we apply go_shopping.
  The new state we get is
 \begin_inset Newline newline
@@ -297,7 +287,7 @@ Now with this new state we do the same thing again, that is, locating all
  possible actions that can be applied on the current state.
  The actions we get is wait, go_shopping and the new one make_cake.
  This time we branch off into three ways with one action (go_shopping) leading
- back to the same state since you can only have one instace of every fluent
+ back to the same state since you can only have one instance of every fluent
  (
 \family typewriter
 has_mix(mike)
@@ -339,7 +329,7 @@ g we would have ended up in this state.
 So now once again we check what actions is applicable on the current state
  and they are go_shopping and make_cake.
  We lose wait since it have a precondition that you cant have hungry.
- So now we only have one nonlooping choice and that is to make_cake and
+ So now we only have one non-looping choice and that is to make_cake and
  we then end up in the new state
 \begin_inset Newline newline
 \end_inset

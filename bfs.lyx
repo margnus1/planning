@@ -296,7 +296,11 @@ reference "alg:bfs"
  we reach a new state we check if it's the goal state, and if it's not the
  goal state we find all possible actions from this new state and again run
  them.
- This procedure was repeted until the goal state was reached.
+ This procedure was 
+\lang british
+repeated
+\lang english
+ until the goal state was reached.
  Then we return the goal state and the path we took to reach that goal.
 \end_layout
 
