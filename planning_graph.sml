@@ -160,7 +160,7 @@ local
                SRelationSet.equal (newMutexes, mutexes) then
                 0
             else
-                plan is { states = newStates, mutexes = newMutexes }
+                1 + plan is { states = newStates, mutexes = newMutexes }
         end
 
     fun gatherFluents' [] binding = binding
