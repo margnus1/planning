@@ -144,7 +144,8 @@ fun satisfyingBindings _ _ ([] : predicate list) (bindings : binding) = [ bindin
         fun falseBinds bindings [] args = [ bindings ]
           | falseBinds bindings _  []   = []
           | falseBinds bindings fluentArgs (Literal v :: args) =
-            falseBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
+            (* We have already prefiltered non-matching literals above *)
+            falseBinds bindings fluentArgs args
           | falseBinds bindings fluentArgs (Variable n :: args) =
             case StringMap.find (bindings, n) of
                 SOME v => falseBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
