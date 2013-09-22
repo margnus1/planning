@@ -131,7 +131,7 @@ fun satisfyingBindings _ _ ([] : predicate list) (bindings : binding) = [ bindin
           | falseBinds bindings fluentArgs (Variable n :: args) =
             case StringMap.find (bindings, n) of
                 SOME v => falseBinds bindings (List.mapPartial (takeEqual v) fluentArgs) args
-              | NONE => mapConcat (fn v => falseBinds bindings
+              | NONE => mapConcat (fn v => falseBinds (StringMap.insert (bindings, n, v))
                                                       (List.mapPartial (takeEqual v) fluentArgs)
                                                       args)
                                   objects
