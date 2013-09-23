@@ -8,7 +8,7 @@
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children false
-\language english
+\language british
 \language_package default
 \inputencoding auto
 \fontencoding global
@@ -97,11 +97,53 @@ Introduction
 \end_layout
 
 \begin_layout Standard
+We have implemented
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/margnus1/planning
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ a simple planning problem solver.
+ It uses an encoding of PDDL as JSON (see an example in Section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "sec:bfs_example"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
 Since the primary goal is to find the shortest path to the goal state, we
  decided to use Breadth first search algorithm since it is guaranteed to
  find the shortest path.
  But since BFS can choke on trees with a lot of nodes we decided to also
- use A* to complement BFS running them both in parallel.
+ use A* to complement BFS running them both concurrently.
+\end_layout
+
+\begin_layout Standard
+However, our implementation of A* turned out to be so inefficient that it
+ did not beat BFS on any problem we tried it with.
+ Thus, we decided to not put in the effort of making them run concurrently.
 \end_layout
 
 \begin_layout Section
@@ -165,6 +207,16 @@ BFS Example
 \end_layout
 
 \begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:bfs_example"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Let us step through an example run on the following file,
 \end_layout
 
@@ -172,6 +224,7 @@ Let us step through an example run on the following file,
 \begin_inset CommandInset include
 LatexCommand lstinputlisting
 filename "test1.json"
+lstparams "breaklines=true,morestring={[b]\"}"
 
 \end_inset
 
@@ -182,96 +235,99 @@ filename "test1.json"
 We start with parsing the file so we get more useful data.
  In other words we save all actions in a list, all objects found in a list,
  the starting state and the goal we try to reach.
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-So in the example test1.json above we would have
-\begin_inset Newline newline
-\end_inset
+\begin_layout Standard
+In the example test1.json above we would have:
+\end_layout
 
-Actions:[
+\begin_layout Description
+Actions: [
 \family typewriter
 go_shopping(x)
 \family default
 ,
 \family typewriter
-make_cake(x)
+ make_cake(x)
 \family default
 ,
 \family typewriter
-wait(x)
+ wait(x)
 \family default
 ,
 \family typewriter
-eat_cake_a(x)
+ eat_cake_a(x)
 \family default
 , 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
 \family typewriter
 eat_cake_b(x)
 \family default
 ]
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-Objects:[
+\end_deeper
+\begin_layout Description
+Objects: [
 \family typewriter
 mike
 \family default
 ]
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Description
 start: 
 \family typewriter
 person(mike)
-\family default
+\end_layout
 
-\begin_inset Newline newline
-\end_inset
-
+\begin_layout Description
 goal: [
 \family typewriter
 person(mike)
 \family default
 ,
 \family typewriter
-has_cake(mike)
+ has_cake(mike)
 \family default
 ,
 \family typewriter
-eaten_cake(mike)
+ eaten_cake(mike)
 \family default
 ]
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
 Now we find all actions the can be run on the starting state.
  In this case it is wait and go_shopping since they only need a person and
- in waits case also that you 
-\lang british
-don’t
-\lang english
- have hungry.
- So now we branch off in two different directions as you can see in the
- picture below 
+ in waits case also that you don’t have hungry.
+ So now we branch off in two different directions as you can see in Figure
+\begin_inset space ~
+\end_inset
+
+
 \begin_inset CommandInset ref
-LatexCommand nameref
+LatexCommand vref
 reference "test1"
 
 \end_inset
 
+.
+\end_layout
 
-\begin_inset Newline newline
-\end_inset
-
+\begin_layout Standard
 To simplify this example we chose to follow the path that start with go_shopping
  even if in reality both paths are run separately.
  In this case when we apply go_shopping.
  The new state we get is
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-State:(
+\begin_layout Description
+State: (
 \family typewriter
 person(mike)
 \family default
@@ -280,9 +336,9 @@ person(mike)
 has_mix(mike)
 \family default
 )
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
 Now with this new state we do the same thing again, that is, locating all
  possible actions that can be applied on the current state.
  The actions we get is wait, go_shopping and the new one make_cake.
@@ -295,10 +351,10 @@ has_mix(mike)
 ).
  Once again just for this example we follow the wait path and apply it to
  the current state and end up in the state
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-State:(
+\begin_layout Description
+State: (
 \family typewriter
 person(mike)
 \family default
@@ -311,10 +367,14 @@ has_mix(mike)
 hungry(mike)
 \family default
 )
-\begin_inset Newline newline
+\end_layout
+
+\begin_layout Standard
+As can be seen in Figure
+\begin_inset space ~
 \end_inset
 
-As can be seen in the 
+
 \begin_inset CommandInset ref
 LatexCommand nameref
 reference "test1"
@@ -323,18 +383,18 @@ reference "test1"
 
 , if we would have taken the wait path in the first step and then did go_shoppin
 g we would have ended up in this state.
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
 So now once again we check what actions is applicable on the current state
  and they are go_shopping and make_cake.
  We lose wait since it have a precondition that you cant have hungry.
  So now we only have one non-looping choice and that is to make_cake and
  we then end up in the new state
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-State:(
+\begin_layout Description
+State: (
 \family typewriter
 person(mike)
 \family default
@@ -351,17 +411,17 @@ hungry(mike)
 has_cake(mike)
 \family default
 )
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
 We again find the action we can apply.
  They are go_shopping, make_cake and eat_cake_a.
  We follow eat_cake_a since it's the only one that doesn't loop to the same
  state again, so after applying eat_cake we end up in the new state
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-State:(
+\begin_layout Description
+State: (
 \family typewriter
 person(mike)
 \family default
@@ -374,16 +434,16 @@ has_mix(mike)
 eaten_cake(mike)
 \family default
 )
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
 We again find the actions we can apply.
  They are go_shopping, make_cake and wait.
  We follow make_cake and end up in the state
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-State:(
+\begin_layout Description
+State: (
 \family typewriter
 person(mike)
 \family default
@@ -400,13 +460,13 @@ eaten_cake(mike)
 has_cake(mike)
 \family default
 )
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
 Now we can see that we have reached a state that contains the goal state
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Description
 goal: [
 \family typewriter
 person(mike)
@@ -420,10 +480,10 @@ has_cake(mike)
 eaten_cake(mike)
 \family default
 ]
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-State:(
+\begin_layout Description
+State: (
 \family typewriter
 person(mike)
 \family default
@@ -440,9 +500,9 @@ eaten_cake(mike)
 has_mix(mike)
 \family default
 )
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
+\begin_layout Standard
 and because a BFS runs all steps in parallel the first path to the goal
  we find is one of the shortest ones.
 \end_layout
@@ -455,7 +515,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename graph.eps
+	filename graph.svg
 	width 100col%
 
 \end_inset
@@ -467,12 +527,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Picture
-\end_layout
-
-\end_inset
-
-
+State graph for example
 \begin_inset CommandInset label
 LatexCommand label
 name "test1"
@@ -482,7 +537,8 @@ name "test1"
 
 \end_layout
 
-\begin_layout Plain Layout
+\end_inset
+
 
 \end_layout
 
