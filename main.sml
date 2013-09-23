@@ -10,18 +10,22 @@ fun printUsage () =
      TextIO.printLine "      Solves the problem using A*";
      TextIO.printLine "    stategraph:";
      TextIO.printLine "      Generates the entire state graph as a graphviz graph over stdout";
+     TextIO.printLine "    verify:";
+     TextIO.printLine "      Verifies the solution in <solutionfile>";
      TextIO.printLine "  Solutions are saved to <solutionfile> if specified, to solution.json otherwise")
 
 fun indent4 s = "    " ^ s
 
+exception BadSolution of string
+
 fun checkPathA (problem, current, nil) =
     if isGoal problem current then true else
-    raise Fail "The resulting state is not the goal state"
+    raise BadSolution "The resulting state is not the goal state"
   | checkPathA (problem, current,
                 (head as Instance {bindings, action=Action {name, preconditions, ...}, ...}) :: tail) =
     if matchesPredicates preconditions bindings current then
         checkPathA (problem, (applyAction current) head, tail)
-    else raise Fail ("The action " ^ name ^ " did not fulfill it's preconditions")
+    else raise BadSolution ("The action " ^ name ^ " did not fulfill it's preconditions")
 
 fun checkPath (problem as Problem{start, ...}, path : action_instance list) =
     checkPathA (problem, start, path)
@@ -63,6 +67,19 @@ fun search (file::rest) algorithm =
 case CommandLine.arguments () of
     "bfs"   :: args => search args BFS.search
   | "astar" :: args => search args AStar.search
+  | "verify" :: problemFile :: solutionFile :: _ =>
+    let
+        val problem = parseProblem problemFile
+        val solution = PDDLParser.parseSolution problem
+                           (JSONParser.parseFile solutionFile)
+    in
+        (if checkPath (problem, solution) then
+             TextIO.printLine "Solution OK!"
+         else
+             TextIO.printLine "Solution bad, I don't know why!")
+        handle BadSolution why =>
+               TextIO.printLine ("Solution bad: " ^ why)
+    end
   | ["stategraph", file] => Stategraph.toDot (parseProblem file)
   | _ => printUsage ()
 ;

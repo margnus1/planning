@@ -74,10 +74,10 @@ fun extractVariableNames nil acc = acc
   | extractVariableNames ((Action {variables, ...}) :: As) acc =
     extractVariableNames As (StringSet.addList (acc, variables))
 
+fun findKey k l = #2 (valOf (List.find (fn (k', v) => k = k') l))
 in
 fun parse (OBJECT ol) =
     let
-        fun findKey k l = #2 (valOf (List.find (fn (k', v) => k = k') l))
         val OBJECT ao = findKey "actions" ol
         val actions   = parseActions (ao, nil)
         val ARRAY sa  = findKey "start" ol
@@ -98,6 +98,25 @@ fun parse (OBJECT ol) =
         if not (StringSet.isEmpty (StringSet.intersection (objectSet, variableNames))) then
             TextIO.errorLine "Warning: Variable names are shadowing objects" else ();
         Problem { actions = actions, start = start, goal = goal, objects = objects }
+    end
+
+fun parseSolution (Problem {actions, ...}) (OBJECT ol) =
+    let
+        val ARRAY al = findKey "plan" ol
+        fun parseSFluent (STRING s) = parseFluent s
+        fun parseInstance (name, arguments) =
+            let
+                val SOME (action as Action {variables, ...}) =
+                    List.find (fn Action {name=n,...} => n=name)
+                              actions
+                val binding = foldl StringMap.insert' StringMap.empty
+                                    (ListPair.zip (variables, arguments))
+            in
+                Instance { bindings = binding,
+                           action = action }
+            end
+    in
+        map (parseInstance o parseSFluent) al
     end
 end
 end
